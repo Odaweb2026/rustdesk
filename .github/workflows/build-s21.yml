@@ -20,29 +20,19 @@ jobs:
           flutter-version: '3.19.6'
           channel: 'stable'
 
-      - name: Install dependencies
+      - name: Install vcpkg deps
         run: |
-          vcpkg install libvpx:x64-windows-static libyuv:x64-windows-static opus:x64-windows-static aom:x64-windows-static
-        
-      - name: Apply custom config
-        run: |
-          $content = Get-Content custom.txt
-          $config = @{}
-          foreach ($line in $content) {
-            if ($line -match '(.+)=(.*)') {
-              $config[$matches[1]] = $matches[2]
-            }
-          }
-          # Aplica server e chave
-          (Get-Content src/common.rs) `
-            -replace 'rs-ny.rustdesk.com', '${{ env.RENDEZVOUS_SERVER }}' `
-            | Set-Content src/common.rs
-        env:
-          RENDEZVOUS_SERVER: 100.83.110.44
+          vcpkg install libvpx:x64-windows-static libyuv:x64-windows-static opus:x64-windows-static aom:x64-windows-static --classic
 
-      - name: Build
+      - name: Apply S21 custom config
+        shell: pwsh
         run: |
-          python3 flutter/build_windows.py
+          (Get-Content src/common.rs) -replace 'rs-ny.rustdesk.com', '100.83.110.44' | Set-Content src/common.rs
+          (Get-Content src/common.rs) -replace 'RustDesk', 'Suporte Remoto S21' | Set-Content src/common.rs
+
+      - name: Build Windows
+        shell: pwsh
+        run: python3 flutter/build_windows.py
         env:
           RENDEZVOUS_SERVER: 100.83.110.44
           RS_PUB_KEY: 9qOwriHD7dA05QPpvw7WF5MNMclXdAXpyMMSzDp+6Y4=
