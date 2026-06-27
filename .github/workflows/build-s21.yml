@@ -38,6 +38,7 @@ jobs:
         env:
           RENDEZVOUS_SERVER: 100.83.110.44
           RS_PUB_KEY: 9qOwriHD7dA05QPpvw7WF5MNMclXdAXpyMMSzDp+6Y4=
+          VCPKG_ROOT: C:\vcpkg
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
