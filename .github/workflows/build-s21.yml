@@ -1,1 +1,54 @@
+name: Build Suporte Remoto S21 - Windows
 
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.6'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: |
+          vcpkg install libvpx:x64-windows-static libyuv:x64-windows-static opus:x64-windows-static aom:x64-windows-static
+        
+      - name: Apply custom config
+        run: |
+          $content = Get-Content custom.txt
+          $config = @{}
+          foreach ($line in $content) {
+            if ($line -match '(.+)=(.*)') {
+              $config[$matches[1]] = $matches[2]
+            }
+          }
+          # Aplica server e chave
+          (Get-Content src/common.rs) `
+            -replace 'rs-ny.rustdesk.com', '${{ env.RENDEZVOUS_SERVER }}' `
+            | Set-Content src/common.rs
+        env:
+          RENDEZVOUS_SERVER: 100.83.110.44
+
+      - name: Build
+        run: |
+          python3 flutter/build_windows.py
+        env:
+          RENDEZVOUS_SERVER: 100.83.110.44
+          RS_PUB_KEY: 9qOwriHD7dA05QPpvw7WF5MNMclXdAXpyMMSzDp+6Y4=
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: suporte-remoto-s21
+          path: flutter/build/windows/runner/Release/
