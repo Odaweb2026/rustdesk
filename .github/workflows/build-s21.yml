@@ -32,7 +32,7 @@ jobs:
 
       - name: Build Windows
         shell: pwsh
-        run: python3 flutter/build_windows.py
+        run: python3 build.py --flutter
         env:
           RENDEZVOUS_SERVER: 100.83.110.44
           RS_PUB_KEY: 9qOwriHD7dA05QPpvw7WF5MNMclXdAXpyMMSzDp+6Y4=
